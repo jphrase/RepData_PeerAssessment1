@@ -198,18 +198,13 @@ We also look at a histogram of the total steps per day with the missing values f
  
 
 ```r
-## Get total steps per day of new data set
-day_act1 <- summarise(group_by(act1,date),
-                     daily_steps=sum(steps,na.rm=TRUE)
-)
-
 ## Histogram of total steps taken per day with imputed values for NA
 ## 61 days, so bin ~10 days or breaks = 6
 hist(day_act1$daily_steps,
      main="Total Number of Steps Taken Per Day", 
      ylab="Number of Days", 
      xlab="Daily Total Steps Taken",
-     ##ylim=c(0,30),
+     ylim=c(0,35),
      breaks=6
 )
 ```
@@ -230,11 +225,15 @@ act1$weekday[act1$weekday != "Weekend"] <- "Weekday"
 ## Make this column a factor for panel plot
 act1$weekday <- as.factor(act1$weekday)
 
+int_act1 <- summarise(group_by(act1,interval,weekday),
+                     int_steps=mean(steps)
+                     )
+
 ## Use lattice plotting
 library(lattice)
 
 ## Plot
-xyplot(int_steps ~ interval | weekday, act1, 
+xyplot(int_steps ~ interval | weekday, int_act1, 
        type="l",
        xlab="Interval of Day",
        ylab="Avg Number of Steps",
