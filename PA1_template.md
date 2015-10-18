@@ -13,14 +13,14 @@ The data consists of two months of data from an anonymous individual collected
 during the months of October and November, 2012 and include the number of steps  
 taken in 5 minute intervals each day.
 
-```{r setoptions, echo=TRUE}
-```
+
 
 ## Loading and preprocessing the data
 
 The data set is read in and summarized by date. Missing values (NA) are ignored.  
 
-```{r}
+
+```r
 ## Unzip the data file
 ## Assumes the zip file is in the current working directory
 unzip("activity.zip")
@@ -39,19 +39,32 @@ day_act <- summarise(group_by(act,date),
 
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 ## Get mean & median steps per day
 mean_steps <- as.integer(mean(day_act$daily_steps, na.rm=TRUE))
 med_steps <- as.integer(median(day_act$daily_steps, na.rm=TRUE))
 ## inline code below does not echo, so explicitly get results here
 mean_steps
+```
+
+```
+## [1] 10766
+```
+
+```r
 med_steps
 ```
-The mean total number of steps is `r mean_steps`. The median total steps is `r med_steps`.  
+
+```
+## [1] 10765
+```
+The mean total number of steps is 10766. The median total steps is 10765.  
 
 ## Histogram of total steps taken per day  
 
-```{r}
+
+```r
 ## 61 days, so bin 10 days or set breaks=6
 ## set ylim based on exploratory plot, keeping same limit for later comparison
 hist(day_act$daily_steps,
@@ -63,11 +76,14 @@ hist(day_act$daily_steps,
 )
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
 
 ## What is the average daily activity pattern?  
 The data is summarised by interval (5 min periods throughout each day), and the average of each interval is plotted here to visualize the average daily activity pattern.  
 
-```{r}
+
+```r
 ## Get mean of each interval across all days, ignore NAs
 int_act <- summarise(group_by(act,interval),
                      int_steps=mean(steps,na.rm=TRUE)
@@ -81,17 +97,32 @@ plot(int_act$interval,int_act$int_steps,
      ylab="Avg Number of Steps")
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
 We also want to know in which 5 minute interval of the day the maximum number of steps were taken.  
-```{r}
+
+```r
 ## Find the interval with the max number of steps on average
 max_steps <- as.integer(max(int_act$int_steps))
 max_int <- as.integer(int_act[int_act$int_steps == max(int_act$int_steps),1])
 ## inline code below does not echo, so explicitly get results here
 max_steps
+```
+
+```
+## [1] 206
+```
+
+```r
 max_int
 ```
-We find the maximum steps (`r max_steps`) were taken in the `r max_int` interval.
-```{r}
+
+```
+## [1] 835
+```
+We find the maximum steps (206) were taken in the 835 interval.
+
+```r
 ## Get the time of day for the max interval
 ## Hour of day is interval (minute of day) / 60
 
@@ -102,21 +133,31 @@ moh <- max_int %% 60
 tod <- paste0(hod, ":", moh)
 tod
 ```
-*This interval is the 5 minutes of the day ending at `r tod`.*
+
+```
+## [1] "13:55"
+```
+*This interval is the 5 minutes of the day ending at 13:55.*
 
 ## Imputing missing values
-```{r}
+
+```r
 ## Find number of NA entries in steps, use inline code
 NA_steps <- as.integer(sum(is.na(act$steps)))
 ## inline code below
 NA_steps
 ```
 
-Because the data set contains `r NA_steps` missing values (NA), we want to know if the results will vary if we fill in those missing values.  
+```
+## [1] 2304
+```
+
+Because the data set contains 2304 missing values (NA), we want to know if the results will vary if we fill in those missing values.  
 It is felt that inactive periods will be consistent (sleeping, for example) and active periods possibly consistent as well.  
 The average steps for each interval are therefore calculated and used in place of the missing values.  
 
-```{r}
+
+```r
 ## New df, add column which is steps column with NA replaced with interval mean
 act1 <- merge(act,int_act,by="interval")
 
@@ -130,19 +171,45 @@ imp_med_steps <- as.integer(median(day_act1$daily_steps))
 med_diff <- imp_med_steps - med_steps
 ## Results used in inline code below:
 imp_mean_steps
+```
+
+```
+## [1] 10766
+```
+
+```r
 imp_med_steps
+```
+
+```
+## [1] 10766
+```
+
+```r
 mean_diff
+```
+
+```
+## [1] 0
+```
+
+```r
 med_diff
 ```
-The mean number of steps per day, with NA values filled by average of interval, is `r imp_mean_steps`.  
-This differs from the mean of only the valid data by `r mean_diff`.  
 
-The median number of steps per day, with NA values filled by average of interval, is `r imp_med_steps`.  
-This differs from the median of only the valid data by `r med_diff`.  
+```
+## [1] 1
+```
+The mean number of steps per day, with NA values filled by average of interval, is 10766.  
+This differs from the mean of only the valid data by 0.  
+
+The median number of steps per day, with NA values filled by average of interval, is 10766.  
+This differs from the median of only the valid data by 1.  
 
 We also look at a histogram of the total steps per day with the missing values filled in.  
  
-```{r}
+
+```r
 ## Get total steps per day of new data set
 day_act1 <- summarise(group_by(act1,date),
                      daily_steps=sum(steps,na.rm=TRUE)
@@ -159,12 +226,15 @@ hist(day_act1$daily_steps,
 )
 ```
 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+
 This shows more days with the average number of steps as expected. Days with more or less steps than average are not affected.
 
 ## Are there differences in activity patterns between weekdays and weekends?  
 
 We will group the data by weekend/weekday and plot to see if the patterns differ.  
-```{r}
+
+```r
 ## Make new column for separating Weekends / Weedays
 act1$weekday <- weekdays(as.Date(act1$date))
 act1$weekday[act1$weekday == "Saturday" | act1$weekday == "Sunday"] <- "Weekend"
@@ -182,5 +252,7 @@ xyplot(int_steps ~ interval | weekday, int_act1,
        ylab="Avg Number of Steps",
        layout=c(1,2))
 ```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
 
 The patterns suggest earlier activity during the week and perhaps more activity in the middle of the day on weekends.  
