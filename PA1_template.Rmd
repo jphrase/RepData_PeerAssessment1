@@ -91,18 +91,6 @@ max_steps
 max_int
 ```
 We find the maximum steps (`r max_steps`) were taken in the `r max_int` interval.
-```{r}
-## Get the time of day for the max interval
-## Hour of day is interval (minute of day) / 60
-
-hod <- floor(max_int/60)
-## Minute of the hour is the remainder
-moh <- max_int %% 60
-## Make time of day using text
-tod <- paste0(hod, ":", moh)
-tod
-```
-*This interval is the 5 minutes of the day ending at `r tod`.*
 
 ## Imputing missing values
 ```{r}
@@ -122,6 +110,11 @@ act1 <- merge(act,int_act,by="interval")
 
 ## Impute mean of interval to NA rows
 act1$steps[is.na(act1$steps)] <- act1$int_steps[is.na(act1$steps)]
+
+## Get total steps per day of new data set
+day_act1 <- summarise(group_by(act1,date),
+                     daily_steps=sum(steps)
+)
 
 ## Get new mean & median steps per day, and difference from mean of omitted NA data set
 imp_mean_steps <- as.integer(mean(day_act1$daily_steps))
@@ -176,7 +169,7 @@ act1$weekday <- as.factor(act1$weekday)
 library(lattice)
 
 ## Plot
-xyplot(int_steps ~ interval | weekday, int_act1, 
+xyplot(int_steps ~ interval | weekday, act1, 
        type="l",
        xlab="Interval of Day",
        ylab="Avg Number of Steps",

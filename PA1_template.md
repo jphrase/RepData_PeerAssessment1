@@ -122,23 +122,6 @@ max_int
 ```
 We find the maximum steps (206) were taken in the 835 interval.
 
-```r
-## Get the time of day for the max interval
-## Hour of day is interval (minute of day) / 60
-
-hod <- floor(max_int/60)
-## Minute of the hour is the remainder
-moh <- max_int %% 60
-## Make time of day using text
-tod <- paste0(hod, ":", moh)
-tod
-```
-
-```
-## [1] "13:55"
-```
-*This interval is the 5 minutes of the day ending at 13:55.*
-
 ## Imputing missing values
 
 ```r
@@ -163,6 +146,11 @@ act1 <- merge(act,int_act,by="interval")
 
 ## Impute mean of interval to NA rows
 act1$steps[is.na(act1$steps)] <- act1$int_steps[is.na(act1$steps)]
+
+## Get total steps per day of new data set
+day_act1 <- summarise(group_by(act1,date),
+                     daily_steps=sum(steps)
+)
 
 ## Get new mean & median steps per day, and difference from mean of omitted NA data set
 imp_mean_steps <- as.integer(mean(day_act1$daily_steps))
@@ -226,7 +214,7 @@ hist(day_act1$daily_steps,
 )
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 This shows more days with the average number of steps as expected. Days with more or less steps than average are not affected.
 
@@ -246,13 +234,13 @@ act1$weekday <- as.factor(act1$weekday)
 library(lattice)
 
 ## Plot
-xyplot(int_steps ~ interval | weekday, int_act1, 
+xyplot(int_steps ~ interval | weekday, act1, 
        type="l",
        xlab="Interval of Day",
        ylab="Avg Number of Steps",
        layout=c(1,2))
 ```
 
-![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
 The patterns suggest earlier activity during the week and perhaps more activity in the middle of the day on weekends.  
